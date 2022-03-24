@@ -1,0 +1,12 @@
+entity: nahuelcosta
+project: DTW
+program: train.py
+method: random
+metric:
+  goal: minimize
+  name: loss
+parameters:
+  batch_size:
+    values: [28, 32, 64, 128, 256]
+  learning_rate:
+    values: [0.001, 0.0001]
