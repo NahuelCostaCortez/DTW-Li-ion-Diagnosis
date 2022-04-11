@@ -5,15 +5,17 @@ from scipy.spatial import KDTree
 from dtaidistance import dtw
 import h5py
 import scipy.io as sio
+from IPython.display import display
+import pandas as pd
 
 
 UI_STEP = 0.0005
 MIN_V_LFP = 3.20
 MAX_V_LFP = 3.50
 MIN_V_NCA = 3.20
-MAX_V_NCA = 4.24
+MAX_V_NCA = 4.23
 MIN_V_NMC = 3.44
-MAX_V_NMC = 4.29
+MAX_V_NMC = 4.28
 
 
 # --------------------------------------------------READ DATA--------------------------------------------------
@@ -434,40 +436,90 @@ def rmspe(y_true, y_pred):
     '''
     return np.sqrt(np.mean(np.square((y_true - y_pred)), axis=0))*100
 
-def get_pred(model, x_test, y_test, reshape, DTW):
+def get_IC_references_test(material, size, x_train_pre, Q, path):
 	'''
-	Prints predictions for test set
+	Returns the IC curves for the test sets
+
+	Parameters
+	----------
+	material: str, chemistry of the battery
+    size: int, size at which to reduce the IC data
+	x_train_pre: array, needed for normalising the ICs the same way as in the training set
+    Q: array, capacity percentages from 0 to 100 from the simulated dataset
+    path: path where data is located
+	'''
+	min_v, max_v, _ = get_minmaxV(material)
+	V_references = read_mat(path+'/V_references.mat')['V_references']
+	IC_references = []
+	for cell in V_references:
+		ui, dqi = IC(cell, Q, UI_STEP, min_v, max_v)
+		new_sample = reduce_size(ui, dqi, size-1)
+		# it is necessary to normalise because the x_tests are also normalized in get_data_eval
+		IC_references.append(normalise_data(new_sample, np.min(x_train_pre), np.max(x_train_pre)))
+	return IC_references
+
+def get_pred(model, x_tests, y_test, reshape, DTW):
+	'''
+	Prints predictions for test sets
 
 	Parameters
 	----------
 	model: h5py object, trained model
-    x_test: array, test set
+    x_test: list, test sets
 	y_test: array, test set labels
     reshape: bool, if True, an extra dimension is added to the input
     DTW: bool, if True, the data is reshaped to the DTW model input shape
 	'''
-	cycles = [10, 50, 100, 200, 400, 1000]
-    # reshape to the original shape -> duty_cycle, cycle, voltage
-	x_test = x_test.reshape(-1, len(cycles), x_test.shape[1])
-    # duty_cycle, cycle, labels
-	y_test = y_test.reshape(-1, len(cycles), y_test.shape[1])
+	average = []
+	y_test = y_test.reshape(-1, 6, y_test.shape[1])
     
-	if reshape == True:
-		x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], x_test.shape[2], 1)
+	for x_test_pre in x_tests:
+		cycles = [10, 50, 100, 200, 400, 1000]
+		x_test = x_test_pre.reshape(-1, 6, x_test_pre.shape[1])
 
-	if DTW == True:
-		x_test = x_test.reshape(-1, len(cycles), x_test.shape[1], x_test.shape[2], 1)
-    
-	for cycle in range(x_test.shape[1]):
-		data = x_test[:, cycle, :]
-		labels = y_test[:, cycle, :]
-		predictions = model.predict(data)
+		if reshape == True:
+			x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], x_test.shape[2], 1)
 
-		print("Predictions for cycle ", cycles[cycle])
-		print("RMSE for LLI: ", rmspe(labels[:,0], predictions[:,0]))
-		print("RMSE for LAMPE: ", rmspe(labels[:,1], predictions[:,1]))
-		print("RMSE for LAMNE: ", rmspe(labels[:,2], predictions[:,2]))
-		print("")
+		if DTW == True:
+			x_test = x_test.reshape(-1, 6, x_test_pre.shape[1], x_test_pre.shape[2], 1)
+
+		predictions_LLI = np.zeros(len(cycles))
+		predictions_LAMPE = np.zeros(len(cycles))
+		predictions_LAMNE = np.zeros(len(cycles))
+	
+		for cycle in range(x_test.shape[1]):
+				data = x_test[:, cycle, :]
+				labels = y_test[:, cycle, :]
+				predictions = model.predict(data)
+
+				predictions_LLI[cycle] = rmspe(labels[:,0], predictions[:,0])
+				predictions_LAMPE[cycle] = rmspe(labels[:,1], predictions[:,1])
+				predictions_LAMNE[cycle] = rmspe(labels[:,2], predictions[:,2])
+	
+		df = pd.DataFrame(np.stack((predictions_LLI, predictions_LAMPE, predictions_LAMNE)), index=['LLI', 'LAMPE', 'LAMNE'],columns=[10, 50, 100, 200, 400, 1000])
+		average.append(np.mean(df.mean(axis=1)))		
+		display(df)
+	print("Average: ", np.mean(average))
+
+# falta por documentar en final
+def get_data_eval(path, material, size, Q, cell_no, x_train_pre):
+	'''
+	Converts data to the format required by the models
+
+	Parameters
+	----------
+	path: path where data is located
+    material: str, chemistry of the battery
+    size: int, size at which to reduce the IC data
+    Q: array, capacity percentages from 0 to 100 from the simulated dataset
+    cell_no: int, cell number to study
+    x_train_pre: array, x_train needed to normalise data
+	'''
+	test_data = read_mat(path+'/x_test_'+cell_no+'.mat')['x_test'].T
+	test_data = test_data.reshape(-1, test_data.shape[2]) # (n_samples, seq_len)
+	test_data = convert_to_input_data(test_data, Q, size-1, material)
+	test_data = normalise_data(test_data, np.min(x_train_pre), np.max(x_train_pre))
+	return test_data
 
 def plot_capacity_evolution(cycles, capacity_evolution, y_lim):
 	'''
@@ -597,15 +649,12 @@ def convert_to_input_data(ui_new, Q, size, material):
 	min_v, max_v, path = get_minmaxV(material)
 	samples = []
 	for sample in range(len(ui_new)):
-		# convert to ICA
+		# convert to IC
 		ui_sample, dqi_sample = IC(ui_new[sample], Q, UI_STEP, min_v, max_v)
 		# reduce size
 		new_sample = reduce_size(ui_sample, dqi_sample, size)
 		samples.append(new_sample)
 	x_test = np.array(samples)
-	# normalise
-    # OJO, LLAMAR A NORMALISE DONDE SE USABA ESTA FUNCIÓN ANTES
-	#x_test = normalise_data(samples, np.min(samples), np.max(samples))
 	return x_test
 
 def get_capacity_prediction(info, predictions):
