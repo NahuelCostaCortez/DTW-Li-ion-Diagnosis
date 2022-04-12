@@ -7,6 +7,9 @@ from models import CNN_DTW
 import utils
 
 if __name__ == "__main__":
+	# If wandb is used run the following in the terminal: 
+	# 	wandb login	
+	# 	wandb agent --project project_name --entity entity_name --count num_experiments sweep_id
 	# Default hyperparameters
 	hyperparameter_defaults = dict(
 		size=128,
