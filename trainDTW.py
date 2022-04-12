@@ -3,7 +3,7 @@ import tensorflow as tf
 import wandb
 from wandb.keras import WandbCallback
 
-import models
+from models import CNN_DTW
 import utils
 
 if __name__ == "__main__":
@@ -23,21 +23,20 @@ if __name__ == "__main__":
 	chemistry = "LFP"
 	size = 128
 	# load data from npy file
-	x_train = np.load("data/x_train"+str(size)+"_"+chemistry+"_DTW.npy")
+	x_train = np.load("data/x_train_"+chemistry+"_DTW.npy")
 	x_train = utils.normalise_data(x_train, np.min(x_train), np.max(x_train))
-	y_train = np.load("data/y_train"+str(size)+"_"+chemistry+".npy")
+	y_train = np.load("data/y_train_"+chemistry+".npy")
 	# --------------------------------------------------------------------------------------------------
 
 	# ---------------------------------------------TRAINING---------------------------------------------
-	model = models.CNN_DTW.CNN_DTW(size)
+	model = CNN_DTW.CNN_DTW(size)
 	model.summary()
 	callbacks = [tf.keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=10, restore_best_weights=True),
 				 tf.keras.callbacks.ModelCheckpoint(filepath='./checkpoints/checkpoint', monitor='val_loss', mode='min', verbose=1, save_best_only=True, save_weights_only=True),
 				 WandbCallback()]
-	model.fit(x_train, y_train, config["learning_rate"], callbacks)
 
 	# fit the model
-	model.fit(x_train, y_train, epochs=100, batch_size=config["batch_size"], validation_split=0.2, verbose=2, callbacks=callbacks)
+	model.fit(x_train, y_train, LR=config["learning_rate"], batch_size=config["batch_size"], validation_split=0.2, verbose=2, callbacks=callbacks)
 	# --------------------------------------------------------------------------------------------------
 
 	# --------------------------------------------EVALUATION--------------------------------------------

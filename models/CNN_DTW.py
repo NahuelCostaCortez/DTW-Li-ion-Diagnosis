@@ -26,9 +26,9 @@ class CNN_DTW:
         ])
         return model
         
-    def fit(self, X, y, LR, callbacks):
+    def fit(self, X, y, LR, batch_size, callbacks):
         self.model.compile(loss='mse', optimizer=Adam(learning_rate=LR), metrics=['mse'])
-        self.model.fit(X, y, epochs=50, batch_size=32, validation_split=0.2, verbose=2, callbacks=callbacks, shuffle=True)
+        self.model.fit(X, y, epochs=50, batch_size=batch_size, validation_split=0.2, verbose=2, callbacks=callbacks, shuffle=True)
 
     def save_model(self, path):
         self.model.save(path+'.h5')
