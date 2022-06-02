@@ -4,13 +4,11 @@ from tensorflow.keras.layers import Dense
 class FFN:
     def __init__(self, len):
         self.len = len
-    
-    def create_model(self):
-        model = Sequential()
-        model.add(Dense(64, input_dim=self.len, activation='relu'))
-        model.add(Dense(32, activation='relu'))
-        model.add(Dense(3, activation='sigmoid'))
-        return model
+        self.model = Sequential([
+            Dense(64, input_dim=self.len, activation='relu'),
+            Dense(32, activation='relu'),
+            Dense(3, activation='sigmoid')
+        ])
         
     def fit(self, X, y):
         self.model.compile(loss='mse', optimizer='adam', metrics=['mse'])

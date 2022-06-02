@@ -21,14 +21,14 @@ model = RandomForest.RandomForest(max_depth=10, random_state=42, n_estimators=10
 model.fit(x_train, y_train)
 model.save_model("./models/model-RF_"+chemistry)
 
-# ----------------- CNN_1D -----------------
-model = CNN_1D.CNN_1D(size)
-model.fit(x_train, y_train)
-model.load_weights('./checkpoints/checkpoint')
-model.save('./models/model-CNN_'+chemistry+'.h5')
-model.save_model("./models/model-CNN_1D_"+chemistry)
-
 # ------------------- FFN -------------------
 model = FFN.FFN(size)
 model.fit(x_train, y_train)
 model.save_model("./models/model-FFN_"+chemistry)
+
+# ----------------- CNN_1D -----------------
+x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+model = CNN_1D.CNN_1D(size)
+model.fit(x_train, y_train)
+model.load_weights('./checkpoints/checkpoint')
+model.save_model("./models/model-CNN_1D_"+chemistry)

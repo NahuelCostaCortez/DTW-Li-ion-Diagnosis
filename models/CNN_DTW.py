@@ -6,9 +6,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 class CNN_DTW:
     def __init__(self, size):
         self.size = size
-    
-    def create_model(self):
-        model = Sequential([
+        self.model = Sequential([
             # Note the input shape is the desired size of the image sizexsize with 1 color channel
             Masking(mask_value=-99.0, input_shape=(self.size, self.size, 1)),
             Conv2D(64, (3,3), activation='relu'),
@@ -24,7 +22,6 @@ class CNN_DTW:
             Dense(512, activation='relu'),
             Dense(3, activation='sigmoid')
         ])
-        return model
         
     def fit(self, X, y, LR, batch_size, callbacks):
         self.model.compile(loss='mse', optimizer=Adam(learning_rate=LR), metrics=['mse'])

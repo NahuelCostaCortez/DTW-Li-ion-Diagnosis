@@ -39,7 +39,7 @@ if __name__ == "__main__":
 				 WandbCallback()]
 
 	# fit the model
-	model.fit(x_train, y_train, LR=config["learning_rate"], batch_size=config["batch_size"], validation_split=0.2, verbose=2, callbacks=callbacks)
+	model.fit(x_train, y_train, LR=config["learning_rate"], batch_size=config["batch_size"], callbacks=callbacks)
 	# --------------------------------------------------------------------------------------------------
 
 	# --------------------------------------------EVALUATION--------------------------------------------
