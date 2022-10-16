@@ -6,6 +6,8 @@ The paper associated to this framework is published in Journal of Power Sources 
 
 You can also find a Gradio demo of the model in https://huggingface.co/spaces/NahuelCosta/DTW-CNN
 
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NahuelCostaCortez/DTW-Li-ion-Diagnosis/blob/main/DTWRepresentation.ipynb)
+
 # Files in this Repository
 - \models: folder containing the implementation of different diagnosis models.
 - \saved: folder containing the trained models.
