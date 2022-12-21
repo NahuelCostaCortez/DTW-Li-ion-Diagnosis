@@ -11,16 +11,19 @@ You can also find a Gradio demo of the model in https://huggingface.co/spaces/Na
 - \saved: folder containing the trained models.
 - \mat: folder containing the data for the test sets.
 - dtwRepresentation.ipynb: notebook containing the implementation of the DTW representation.
+- experimentalResults.ipynb: Jupyter notebook to reproduce the saved models results.
 - trainDTW.py: training script for the CNN with the DTW images.
 - train.py: script to train the rest of the models.
 - utils.py: some helper functions.
 - sweep.yaml: sweep configuration for wandb.
 - requirements.txt: requirements for the project.
 
-The training data used in this study is available for download.
+The *training data* used in this study is available for download.
 - LFP: http://dx.doi.org/10.17632/bs2j56pn7y.
 - NCA: http://dx.doi.org/10.17632/2h8cpszy26.1.
 - NMC: http://dx.doi.org/10.17632/pb5xpv8z5r.1.
+
+The *testing data* can be found in \mat folder.
 
 You can convert it to a python format with the save_data function in utils.py.
 

@@ -8,7 +8,6 @@ import scipy.io as sio
 from IPython.display import display
 import pandas as pd
 
-
 UI_STEP = 0.0005
 MIN_V_LFP = 3.20
 MAX_V_LFP = 3.50
@@ -16,7 +15,13 @@ MIN_V_NCA = 3.20
 MAX_V_NCA = 4.23
 MIN_V_NMC = 3.44
 MAX_V_NMC = 4.28
-
+SIZE = 128
+LFP_MIN = 0.0031566024955984595
+LFP_MAX = 2.736867845392978
+NCA_MIN = 0
+NCA_MAX = 0.2682065162447511
+NMC_MIN = 0
+NMC_MAX = 0.1914037352896408
 
 # --------------------------------------------------READ DATA--------------------------------------------------
 def read_mat(file_name):
@@ -499,7 +504,6 @@ def get_pred(model, x_tests, y_test, reshape, DTW):
 		df = pd.DataFrame(np.stack((predictions_LLI, predictions_LAMPE, predictions_LAMNE)), index=['LLI', 'LAMPE', 'LAMNE'],columns=[10, 50, 100, 200, 400, 1000])
 		average.append(np.mean(df.mean(axis=1)))		
 		display(df)
-	print("Average: ", np.mean(average))
 
 # falta por documentar en final
 def get_data_eval(path, material, size, Q, cell_no, x_train_pre):
