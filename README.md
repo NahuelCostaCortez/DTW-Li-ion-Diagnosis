@@ -6,6 +6,8 @@ The paper associated to this framework is published in Journal of Power Sources 
 
 You can also find a Gradio demo of the model in https://huggingface.co/spaces/NahuelCosta/DTW-CNN
 
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NahuelCostaCortez/DTW-Li-ion-Diagnosis/blob/main/DTWRepresentation.ipynb)
+
 # Files in this Repository
 - \models: folder containing the implementation of different diagnosis models.
 - \saved: folder containing the trained models.
@@ -29,3 +31,4 @@ You can convert it to a python format with the save_data function in utils.py.
 
 To execute the python code, it is recommended setting up a new python environment with packages matching the requirements.txt file.
 It can be easily done with anaconda: conda create --name --file requirements.txt.
+Another alternative is to run exactly the same environment under which this project was made. A Dockerfile is provided, which contains the set of instructions for creating a container with all the necessary packages and dependencies. The fastest way to set it up is to clone the reposity, open Visual Studio Code, and from the command palette select "Remote-containers: Open folder in Container".
