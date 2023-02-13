@@ -367,15 +367,15 @@ def get_minmaxV(material):
     max_v = -1
     path = ""
     if material == "LFP":
-        path = './mat/LFP/diagnosis'
+        path = './mat/LFP'
         min_v = MIN_V_LFP
         max_v = MAX_V_LFP
     elif material == "NCA":
-        path = './mat/NCA/diagnosis'
+        path = './mat/NCA'
         min_v = MIN_V_NCA
         max_v = MAX_V_NCA
     elif material == "NMC":
-        path = './mat/NMC/diagnosis'
+        path = './mat/NMC'
         min_v = MIN_V_NMC
         max_v = MAX_V_NMC
     else:
